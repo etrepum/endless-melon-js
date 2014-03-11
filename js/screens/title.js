@@ -1,3 +1,6 @@
+/*jslint sloppy:true, browser: true, devel: true, eqeq: true, vars: true, white: true*/
+/*global game: true, debugPanel:true, me:true*/
+
 game.TitleScreen = me.ScreenObject.extend({
     // constructor
     init: function() {

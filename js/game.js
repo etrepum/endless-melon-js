@@ -1,3 +1,6 @@
+/*jslint sloppy:true, browser: true, devel: true, eqeq: true, vars: true, white: true*/
+/*global game: true, debugPanel:true, me:true*/
+
 // Make this false to to turn on the debugging panel manually
 var enableDebugging = true;
 
@@ -55,6 +58,7 @@ var game = {
         me.input.bindKey(me.input.KEY.X, "jump", true);
 
 		// Start the game.
-		me.state.change(me.state.MENU);
+		// me.state.change(me.state.MENU);
+		me.state.change(me.state.PLAY);
 	}
 };

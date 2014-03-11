@@ -1,3 +1,6 @@
+/*jslint sloppy:true, browser: true, devel: true, eqeq: true, vars: true, white: true*/
+/*global game: true, debugPanel:true, me:true*/
+
 /*------------------- 
 a player entity
 -------------------------------- */
@@ -62,7 +65,7 @@ game.PlayerEntity = me.ObjectEntity.extend({
         this.updateMovement();
 
         // check for collision
-        var res = me.game.collide(this);
+        var res = me.game.world.collide(this);
 
         if (res) {
             // if we collide with an enemy
@@ -79,6 +82,7 @@ game.PlayerEntity = me.ObjectEntity.extend({
                 } else {
                     // let's flicker in case we touched an enemy
                     this.renderable.flicker(45);
+                    me.game.viewport.shake(10, 500, me.game.viewport.AXIS.BOTH);
                 }
             }
         }
@@ -179,9 +183,9 @@ game.EnemyEntity = me.ObjectEntity.extend({
     // manage the enemy movement
     update: function() {
         // do nothing if not in viewport
-        if (!this.inViewport)
+        if (!this.inViewport) {
             return false;
-
+        }
         if (this.alive) {
             if (this.walkLeft && this.pos.x <= this.startX) {
                 this.walkLeft = false;

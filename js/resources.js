@@ -1,3 +1,6 @@
+/*jslint sloppy:true, browser: true, devel: true, eqeq: true, vars: true, white: true*/
+/*global game: true, debugPanel:true, me:true*/
+
 game.resources = [
 
 	/* Graphics. 
@@ -28,7 +31,7 @@ game.resources = [
 	 * @example
 	 * {name: "example01", type: "tmx", src: "data/map/example01.tmx"},
 	 * {name: "example01", type: "tmx", src: "data/map/example01.json"},
- 	 */
+     */
     {name: "area01", type: "tmx", src: "data/map/area01.tmx"},
 
 	/* Background music. 

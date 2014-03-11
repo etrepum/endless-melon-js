@@ -17,6 +17,8 @@ game.resources = [
 	{name: "wheelie_right",       type:"image",	src: "data/img/sprite/wheelie_right.png"},
 	// game font
 	{name: "32x32_font",          type:"image",	src: "data/img/font/32x32_font.png"},
+    // title screen
+    {name: "title_screen",        type:"image", src: "data/img/gui/title_screen.png"},
     /* Atlases 
 	 * @example
 	 * {name: "example_tps", type: "tps", src: "data/img/example_tps.json"},

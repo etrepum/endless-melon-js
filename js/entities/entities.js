@@ -17,7 +17,7 @@ game.PlayerEntity = me.ObjectEntity.extend({
         this.setVelocity(3, 15);
 
         // adjust the bounding box
-        this.updateColRect(8, 48, -1, 0);
+        this.updateColRect(8, 48, 8, 54);
     
         // set the display to follow our position on both axis
         me.game.viewport.follow(this.pos, me.game.viewport.AXIS.BOTH);
@@ -59,6 +59,26 @@ game.PlayerEntity = me.ObjectEntity.extend({
         // check & update player movement
         this.updateMovement();
 
+        // check for collision
+        var res = me.game.collide(this);
+
+        if (res) {
+            // if we collide with an enemy
+            if (res.obj.type == me.game.ENEMY_OBJECT) {
+                // check if we jumped on it
+                if ((res.y > 0) && ! this.jumping) {
+                    // bounce (force jump)
+                    this.falling = false;
+                    this.vel.y = -this.maxVel.y * me.timer.tick;
+                    // set the jumping flag
+                    this.jumping = true;
+                } else {
+                    // let's flicker in case we touched an enemy
+                    this.renderable.flicker(45);
+                }
+            }
+        }
+        
         // update animation if necessary
         if (this.vel.x!=0 || this.vel.y!=0) {
             // update object animation
@@ -71,4 +91,110 @@ game.PlayerEntity = me.ObjectEntity.extend({
         return false;
     }
 
+});
+
+
+/*----------------
+ a Coin entity
+------------------------ */
+game.CoinEntity = me.CollectableEntity.extend({
+    // extending the init function is not mandatory
+    // unless you need to add some extra initialization
+    init: function(x, y, settings) {
+        // define this here instead of tiled
+        settings.image = "spinning_coin_gold";
+        settings.spritewidth = 32;
+        // call the parent constructor
+        this.parent(x, y, settings);
+    },
+
+    // this function is called by the engine, when
+    // an object is touched by something (here collected)
+    onCollision: function() {
+        // do something when collected
+
+        // make sure it cannot be collected "again"
+        this.collidable = false;
+        // remove it
+        me.game.remove(this);
+    }
+
+});
+
+
+/* --------------------------
+an enemy Entity
+------------------------ */
+game.EnemyEntity = me.ObjectEntity.extend({
+    init: function(x, y, settings) {
+        // define this here instead of tiled
+        settings.image = "wheelie_right";
+        settings.spritewidth = 64;
+
+        // call the parent constructor
+        this.parent(x, y, settings);
+
+        this.startX = x;
+        this.endX = x + settings.width - settings.spritewidth;
+        // size of sprite
+
+        // make him start from the right
+        this.pos.x = x + settings.width - settings.spritewidth;
+        this.walkLeft = true;
+
+        // walking & jumping speed
+        this.setVelocity(1, 6);
+
+        // set collision rectangle
+        this.updateColRect(4, 56, 8, 56);
+
+        // make it collidable
+        this.collidable = true;
+        // make it a enemy object
+        this.type = me.game.ENEMY_OBJECT;
+
+    },
+
+    // call by the engine when colliding with another object
+    // obj parameter corresponds to the other object (typically the player) touching this one
+    onCollision: function(res, obj) {
+
+        // res.y >0 means touched by something on the bottom
+        // which mean at top position for this one
+        if (this.alive && (res.y > 0) && obj.falling) {
+            this.renderable.flicker(45);
+        }
+    },
+
+    // manage the enemy movement
+    update: function() {
+        // do nothing if not in viewport
+        if (!this.inViewport)
+            return false;
+
+        if (this.alive) {
+            if (this.walkLeft && this.pos.x <= this.startX) {
+                this.walkLeft = false;
+            } else if (!this.walkLeft && this.pos.x >= this.endX) {
+                this.walkLeft = true;
+            }
+            // make it walk
+			this.flipX(this.walkLeft);
+			this.vel.x += (this.walkLeft) ? -this.accel.x * me.timer.tick : this.accel.x * me.timer.tick;
+				
+        } else {
+            this.vel.x = 0;
+        }
+		
+        // check and update movement
+        this.updateMovement();
+		
+        // update animation if necessary
+        if (this.vel.x!=0 || this.vel.y!=0) {
+            // update object animation
+            this.parent();
+            return true;
+        }
+        return false;
+    }
 });

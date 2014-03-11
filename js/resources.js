@@ -11,6 +11,10 @@ game.resources = [
 	// the parallax background
 	{name: "area01_bkg0",         type:"image",	src: "data/img/area01_bkg0.png"},
 	{name: "area01_bkg1",         type:"image",	src: "data/img/area01_bkg1.png"},
+	// the spinning coin spritesheet
+	{name: "spinning_coin_gold",  type:"image",	src: "data/img/sprite/spinning_coin_gold.png"},
+	// our enemty entity
+	{name: "wheelie_right",       type:"image",	src: "data/img/sprite/wheelie_right.png"},
     /* Atlases 
 	 * @example
 	 * {name: "example_tps", type: "tps", src: "data/img/example_tps.json"},

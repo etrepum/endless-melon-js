@@ -4,8 +4,11 @@ game.resources = [
 	 * @example
 	 * {name: "example", type:"image", src: "data/img/example.png"},
 	 */
-
-	/* Atlases 
+    // our level tileset
+	{name: "area01_level_tiles",  type:"image",	src: "data/img/map/area01_level_tiles.png"},
+    // the main player spritesheet
+	{name: "gripe_run_right", type:"image", src: "data/img/sprite/gripe_run_right.png"},
+    /* Atlases 
 	 * @example
 	 * {name: "example_tps", type: "tps", src: "data/img/example_tps.json"},
 	 */
@@ -15,6 +18,7 @@ game.resources = [
 	 * {name: "example01", type: "tmx", src: "data/map/example01.tmx"},
 	 * {name: "example01", type: "tmx", src: "data/map/example01.json"},
  	 */
+    {name: "area01", type: "tmx", src: "data/map/area01.tmx"}
 
 	/* Background music. 
 	 * @example

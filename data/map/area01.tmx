@@ -66,6 +66,13 @@
   <object name="CoinEntity" x="416" y="160" width="32" height="32"/>
   <object name="CoinEntity" x="448" y="192" width="32" height="32"/>
   <object name="CoinEntity" x="480" y="224" width="32" height="32"/>
+  <object name="me.LevelEntity" x="1248" y="0" width="32" height="160">
+   <properties>
+    <property name="duration" value="250"/>
+    <property name="fade" value="#000000"/>
+    <property name="to" value="area01"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="collision" width="40" height="15" opacity="0.42">
   <data encoding="base64">

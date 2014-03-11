@@ -52,6 +52,8 @@ game.PlayerEntity = me.ObjectEntity.extend({
 				this.vel.y = -this.maxVel.y * me.timer.tick;
 				// set the jumping flag
 				this.jumping = true;
+                // play some audio 
+                me.audio.play("jump");
 			}
 
         }
@@ -72,6 +74,8 @@ game.PlayerEntity = me.ObjectEntity.extend({
                     this.vel.y = -this.maxVel.y * me.timer.tick;
                     // set the jumping flag
                     this.jumping = true;
+                    // play some audio
+                    me.audio.play("stomp");
                 } else {
                     // let's flicker in case we touched an enemy
                     this.renderable.flicker(45);
@@ -112,6 +116,9 @@ game.CoinEntity = me.CollectableEntity.extend({
     // an object is touched by something (here collected)
     onCollision: function() {
         // do something when collected
+
+        // play a "coin collected" sound
+        me.audio.play("cling");
 
         // give some score
         game.data.score += 250;        

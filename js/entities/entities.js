@@ -14,7 +14,13 @@ game.PlayerEntity = me.ObjectEntity.extend({
 
     init: function(x, y, settings) {
         // call the constructor
+        settings = settings || {};
+        settings.image = "gripe_run_right";
+        settings.spritewidth = 64;
         this.parent(x, y, settings);
+        this.collidable = false;
+        this.height = 64;
+        this.alwaysUpdate = true;
 
 		// set the default horizontal & vertical speed (accel vector)
         this.setVelocity(3, 15);
@@ -33,20 +39,15 @@ game.PlayerEntity = me.ObjectEntity.extend({
 
     ------ */
     update: function() {
-
-        if (me.input.isKeyPressed('left')) {
-            // flip the sprite on horizontal axis
-			this.flipX(true);
-			// update the entity velocity
-			this.vel.x -= this.accel.x * me.timer.tick;
-        } else if (me.input.isKeyPressed('right')) {
-            // unflip the sprite
-			this.flipX(false);
-			// update the entity velocity
-			this.vel.x += this.accel.x * me.timer.tick;
+        if (this.collisionBox.top > me.game.world.height) {
+            // Player died, but we'll just make them jump!
+            this.pos.y = me.game.world.height;
+            this.vel.y = -2 * this.maxVel.y;
+            game.data.score = 0;
         } else {
-            this.vel.x = 0;
+            game.data.score = game.data.score + 1;
         }
+
         if (me.input.isKeyPressed('jump')) {
 			// make sure we are not already jumping or falling
             if (!this.jumping && !this.falling) {
@@ -62,43 +63,45 @@ game.PlayerEntity = me.ObjectEntity.extend({
         }
 
         // check & update player movement
+        var y0 = this.collisionBox.bottom;
         this.updateMovement();
+        var y1 = this.collisionBox.bottom;
 
         // check for collision
-        var res = me.game.world.collide(this);
-
-        if (res) {
-            // if we collide with an enemy
-            if (res.obj.type == me.game.ENEMY_OBJECT) {
-                // check if we jumped on it
-                if ((res.y > 0) && ! this.jumping) {
-                    // bounce (force jump)
+        me.game.world.collide(this, true).forEach(function (collision) {
+            if (collision.obj.type === 'platform') {
+                var top = collision.obj.collisionBox.top;
+                if (y0 <= top && y1 >= top) {
+                    this.pos.y = this.pos.y - y1 + top;
+                    this.vel.y = 0;
                     this.falling = false;
-                    this.vel.y = -this.maxVel.y * me.timer.tick;
-                    // set the jumping flag
-                    this.jumping = true;
-                    // play some audio
-                    me.audio.play("stomp");
-                } else {
-                    // let's flicker in case we touched an enemy
-                    this.renderable.flicker(45);
-                    me.game.viewport.shake(10, 500, me.game.viewport.AXIS.BOTH);
                 }
             }
-        }
+        }, this);
         
-        // update animation if necessary
-        if (this.vel.x!=0 || this.vel.y!=0) {
-            // update object animation
-            this.parent();
-            return true;
-        }
+        // update object animation
+        this.parent();
 		
-		// else inform the engine we did not perform
-		// any update (e.g. position, animation)
-        return false;
+		// inform the engine we performed an update
+        return true   ;
+    },
+    updateMovement: function() {
+        this.computeVelocity(this.vel);
+        this.pos.add(this.vel);
+    },
+    computeVelocity: function(vel) {
+        if (this.gravity) {
+            vel.y += this.gravity * me.timer.tick;
+            this.falling = vel.y > 0;
+            if (this.falling) {
+                this.jumping = false;
+            }
+        }
+        // cap falling velocity
+        if (vel.y > this.maxVel.y) {
+            vel.y = this.maxVel.y;
+        }
     }
-
 });
 
 
@@ -128,7 +131,7 @@ game.CoinEntity = me.CollectableEntity.extend({
         game.data.score += 250;        
 
         // make sure it cannot be collected "again"
-        this.collidable = false;
+        this.collidable = true;
         // remove it
         me.game.remove(this);
     }
@@ -210,5 +213,85 @@ game.EnemyEntity = me.ObjectEntity.extend({
             return true;
         }
         return false;
+    }
+});
+
+game.PlatformGenerator = me.Renderable.extend({
+    init: function() {
+        this.parent(new me.Vector2d(), me.game.viewport.width, me.game.viewport.height);
+        this.alwaysUpdate = true;
+        this.platformFrequency = 40;
+        this.nextPlatformAt = 0;
+        this.tick = 0;
+        // Add a first platform
+        var platform = me.entityPool.newInstanceOf('PlatformEntity', 0, 300, {width: this.width});
+        me.game.world.addChild(platform);
+    },
+    update: function() {
+        if (this.tick % this.platformFrequency === 0) {
+            this.nextPlatformAt = this.platformFrequency;
+            var platform = me.entityPool.newInstanceOf("PlatformEntity", this.width, 300 + Math.floor(Math.random() * 100), {});
+            me.game.world.addChild(platform);
+        }
+        this.tick = this.tick + 1;
+        return true;
+    }
+});
+
+game.PlatformEntity = me.ObjectEntity.extend({
+    init: function(x, y, settings) {
+        settings = settings || {};
+        settings.width = settings.width || 150;
+        settings.height = settings.height || 10;
+        this.renderable = new game.RenderableRect(0, 0, settings.width, settings.height);
+        this.parent(x, y, settings);
+        this.collidable = true;
+        this.type = 'platform';
+        this.gravity = 0;
+        this.vel.x = -5;
+        this.alwaysUpdate = true;
+    },
+    onCollision: function(res, obj) {
+    },
+    update: function() {
+        this.updateMovement();
+        if (this.collisionBox.right < -150) {
+            me.game.world.removeChild(this);
+            me.entityPool.freeInstance(this);
+        }
+        return true;
+    }
+});
+
+game.RenderableRect = me.Renderable.extend({
+    init: function(x, y, w, h) {
+        this.parent(new me.Vector2d(x, y), w, h);
+        this.z = 2;
+    },
+    destroy: function () {
+    },
+    draw: function(context) {
+        context.save();
+        context.fillStyle = '#fff';
+        context.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+        context.restore();
+    }
+});
+
+game.NullCollisionLayer = me.Renderable.extend({
+    init: function(width, height) {
+        this.parent(new me.Vector2d(0, 0), width, height);
+        this.isCollisionMap = true;
+    },
+    reset: function() {
+    },
+    checkCollision: function(obj, pv) {
+        var res = {
+            x: 0,
+            y: 0,
+            xprop: {},
+            yprop: {}
+        };
+        return res;
     }
 });

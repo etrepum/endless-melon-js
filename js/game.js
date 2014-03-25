@@ -51,11 +51,16 @@ var game = {
         me.entityPool.add("mainPlayer", game.PlayerEntity);
         me.entityPool.add("CoinEntity", game.CoinEntity);
         me.entityPool.add("EnemyEntity", game.EnemyEntity);
+        me.entityPool.add("PlatformEntity", game.PlatformEntity, true);
 
         // enable the keyboard
         me.input.bindKey(me.input.KEY.LEFT,	"left");
         me.input.bindKey(me.input.KEY.RIGHT, "right");
-        me.input.bindKey(me.input.KEY.X, "jump", true);
+        me.input.bindKey(me.input.KEY.UP,	"up");
+        me.input.bindKey(me.input.KEY.DOWN, "down");
+        me.input.bindKey(me.input.KEY.SPACE, "jump", true);
+        me.input.bindTouch(me.input.KEY.SPACE);
+        
 
 		// Start the game.
 		// me.state.change(me.state.MENU);
